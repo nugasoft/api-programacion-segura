@@ -21,18 +21,18 @@ db.connect((err) => {
 });
 
 // Endpoint para crear un nuevo contacto
-app.post("/contactos", (req, res) => {
+app.post("/directorio", (req, res) => {
 	const { nombre, celular, correo } = req.body;
-	const query = `INSERT INTO contactos (nombre, celular, correo, fechacreo) VALUES ('${nombre}', '${celular}', '${correo}')`;
+	const query = `INSERT INTO directorio (nombre, celular, correo, fechacreo) VALUES ('${nombre}', '${celular}', '${correo}')`;
 	db.query(query, (err, result) => {
 		if (err) throw err;
 		res.status(201).send(`Contacto agregado con ID: ${result.insertId}`);
 	});
 });
 
-// Endpoint para listar todos los contactos
-app.get("/contactos", (req, res) => {
-	const query = "SELECT * FROM contactos";
+// Endpoint para listar todos los directorio
+app.get("/directorio", (req, res) => {
+	const query = "SELECT * FROM directorio";
 	db.query(query, (err, results) => {
 		if (err) throw err;
 		res.json(results);
@@ -40,18 +40,23 @@ app.get("/contactos", (req, res) => {
 });
 
 // Endpoint para obtener un contacto específico por ID
-app.get("/contactos/:id", (req, res) => {
-	const query = `SELECT * FROM contactos WHERE id = ${req.params.id}`;
+app.get("/directorio/:id", (req, res) => {
+	const query = "SELECT * FROM directorio WHERE id = " + req.params.id;
+
 	db.query(query, (err, result) => {
-		if (err) throw err;
-		res.json(result);
+		if (err) {
+			console.error(err.message);
+			res.status(500).json({ error: "Error interno del servidor" });
+		} else {
+			res.json(result);
+		}
 	});
 });
 
 // Endpoint para actualizar un contacto
-app.put("/contactos/:id", (req, res) => {
+app.put("/directorio/:id", (req, res) => {
 	const { nombre, celular, correo } = req.body;
-	const query = `UPDATE contactos SET nombre = '${nombre}', celular = '${celular}', correo = '${correo}' WHERE id = ${req.params.id}`;
+	const query = `UPDATE directorio SET nombre = '${nombre}', celular = '${celular}', correo = '${correo}' WHERE id = ${req.params.id}`;
 	db.query(query, (err, result) => {
 		if (err) throw err;
 		res.send(`Contacto con ID: ${req.params.id} actualizado`);
@@ -59,8 +64,8 @@ app.put("/contactos/:id", (req, res) => {
 });
 
 // Endpoint para eliminar un contacto
-app.delete("/contactos/:id", (req, res) => {
-	const query = `DELETE FROM contactos WHERE id = ${req.params.id}`;
+app.delete("/directorio/:id", (req, res) => {
+	const query = `DELETE FROM directorio WHERE id = ${req.params.id}`;
 	db.query(query, (err, result) => {
 		if (err) throw err;
 		res.send(`Contacto con ID: ${req.params.id} eliminado`);
