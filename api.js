@@ -1,17 +1,22 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const app = express.Router();
 const db = require('./db');
 
 const auth = require('./middlewares/auth-jwt');
 const LoginLimiter = require("./middlewares/login-limiter");
-const bcrypt = require("bcryptjs");
+const validations = require('./validations');
 
 
 // Endpoint para crear un nuevo usuario
-app.post("/usuarios", async (req, res) => {
-    const { email, password, nombre, apellidos } = req.body;
+app.post("/usuarios", async (req, res, next) => {
+    const { body } = req;
+    const validationResult = validations.signUpValidation(body);
+    if (!validationResult.success) return next(validationResult.error);
+
+    const { email, password, nombre, apellidos } = body;
     const EncryptPass = await bcrypt.hash(password, 10);
 
     const query = `INSERT INTO usuarios (email, password, nombre, apellidos, fechacreo) VALUES (?, ?, ?, ?, NOW())`;
@@ -23,8 +28,12 @@ app.post("/usuarios", async (req, res) => {
 
 // Endpoint para INICIAR SESIÖN
 app.use('/login', LoginLimiter);
-app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+app.post("/login", async (req, res, next) => {
+    const { body } = req;
+    const validationResult = validations.signInValidation(body);
+    if (!validationResult.success) return next(validationResult.error);
+
+    const { email, password } = body;
     const inputs = [email, password];
     const query = `SELECT * FROM usuarios WHERE email = ?;`;
     db.query(query, inputs, async (err, result) => {
